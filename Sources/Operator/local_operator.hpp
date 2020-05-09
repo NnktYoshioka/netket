@@ -58,7 +58,7 @@ class LocalOperator : public AbstractOperator {
   std::vector<StateType> states_;
   std::vector<ConnType> connected_;
 
-  double constant_;
+  Complex constant_;
 
   std::size_t nops_;
 
@@ -75,13 +75,13 @@ class LocalOperator : public AbstractOperator {
   // }
 
   explicit LocalOperator(std::shared_ptr<const AbstractHilbert> hilbert,
-                         double constant = 0.)
+                         Complex constant = 0.)
       : AbstractOperator(hilbert), constant_(constant), nops_(0) {}
 
   explicit LocalOperator(std::shared_ptr<const AbstractHilbert> hilbert,
                          const std::vector<MatType> &mat,
                          const std::vector<SiteType> &sites,
-                         double constant = 0.)
+                         Complex constant = 0.)
       : AbstractOperator(hilbert), constant_(constant) {
     for (std::size_t i = 0; i < mat.size(); i++) {
       Push(mat[i], sites[i]);
@@ -91,7 +91,7 @@ class LocalOperator : public AbstractOperator {
 
   explicit LocalOperator(std::shared_ptr<const AbstractHilbert> hilbert,
                          const MatType &mat, const SiteType &sites,
-                         double constant = 0.)
+                         Complex constant = 0.)
       : AbstractOperator(hilbert), constant_(constant) {
     Push(mat, sites);
     // TODO sort sites and swap columns of mat accordingly
@@ -368,7 +368,7 @@ class LocalOperator : public AbstractOperator {
                          lhs.constant_ + rhs.constant_);
   }
 
-  friend LocalOperator operator+(const LocalOperator &lhs, double constant) {
+  friend LocalOperator operator+(const LocalOperator &lhs, Complex constant) {
     auto sites = lhs.sites_;
     auto mat = lhs.mat_;
 
@@ -376,25 +376,27 @@ class LocalOperator : public AbstractOperator {
                          lhs.constant_ + constant);
   }
 
-  LocalOperator &operator+=(const LocalOperator &rhs) {
-    assert(rhs.GetHilbert().LocalStates().size() ==
+  LocalOperator &operator+=(const LocalOperator &lhs) {
+    assert(lhs.GetHilbert().LocalStates().size() ==
            this->GetHilbert().LocalStates().size());
 
-    this->sites_.insert(this->sites_.end(), rhs.sites_.begin(),
-                        rhs.sites_.end());
-    this->mat_.insert(this->mat_.end(), rhs.mat_.begin(), rhs.mat_.end());
-    this->constant_ += rhs.constant_;
+    this->sites_.insert(this->sites_.end(), lhs.sites_.begin(),
+                        lhs.sites_.end());
+    this->mat_.insert(this->mat_.end(), lhs.mat_.begin(), lhs.mat_.end());
+    this->constant_ += lhs.constant_;
     this->Init();
 
     return *this;
   }
 
-  LocalOperator &operator+=(double constant) {
+  LocalOperator &operator+=(Complex constant) {
     this->constant_ += constant;
+    this->Init();
     return *this;
   }
 
   template <class T>
+  /* template <class Complex> */
   friend LocalOperator operator*(T lhs, const LocalOperator &rhs) {
     auto mat = rhs.mat_;
     auto sites = rhs.sites_;
@@ -405,9 +407,12 @@ class LocalOperator : public AbstractOperator {
           mat[opn][i][j] *= lhs;
       }
     }
+    /* Complex _lhs = lhs */
 
     return LocalOperator(rhs.GetHilbertShared(), mat, sites,
-                         std::real(lhs * rhs.constant_));
+                         /* std::real(lhs * rhs.constant_)); */
+                         lhs * rhs.constant_);
+                         /* std::double(lhs) * rhs.constant_); */
   }
 
   const std::vector<MatType> &LocalMatrices() const { return mat_; }

@@ -31,7 +31,7 @@ namespace netket {
 void AddLocalOperator(py::module &subm) {
   py::class_<LocalOperator, AbstractOperator, std::shared_ptr<LocalOperator>>(
       subm, "LocalOperator", R"EOF(A custom local operator.)EOF")
-      .def(py::init<std::shared_ptr<const AbstractHilbert>, double>(),
+      .def(py::init<std::shared_ptr<const AbstractHilbert>, Complex>(),
            py::keep_alive<1, 2>(), py::arg("hilbert"), py::arg("constant") = 0.,
            R"EOF(
            Constructs a new ``LocalOperator`` given a hilbert space and (if
@@ -58,7 +58,7 @@ void AddLocalOperator(py::module &subm) {
            )EOF")
       .def(py::init<std::shared_ptr<const AbstractHilbert>,
                     std::vector<LocalOperator::MatType>,
-                    std::vector<LocalOperator::SiteType>, double>(),
+                    std::vector<LocalOperator::SiteType>, Complex>(),
            py::keep_alive<1, 2>(), py::arg("hilbert"), py::arg("operators"),
            py::arg("acting_on"), py::arg("constant") = 0., R"EOF(
           Constructs a new ``LocalOperator`` given a hilbert space, a vector of
@@ -90,7 +90,7 @@ void AddLocalOperator(py::module &subm) {
               ```
           )EOF")
       .def(py::init<std::shared_ptr<const AbstractHilbert>,
-                    LocalOperator::MatType, LocalOperator::SiteType, double>(),
+                    LocalOperator::MatType, LocalOperator::SiteType, Complex>(),
            py::keep_alive<1, 2>(), py::arg("hilbert"), py::arg("operator"),
            py::arg("acting_on"), py::arg("constant") = 0., R"EOF(
            Constructs a new ``LocalOperator`` given a hilbert space, an
@@ -132,22 +132,27 @@ void AddLocalOperator(py::module &subm) {
       .def("conjugate", &LocalOperator::Conjugate,
            R"EOF(Returns the complex conjugation of this operator)EOF")
       .def(py::self + py::self)
-      .def("__mul__", [](const LocalOperator &a, double b) { return b * a; },
+      .def("__mul__", [](const LocalOperator &a, Complex b) { return b * a; },
            py::is_operator())
-      .def("__rmul__", [](const LocalOperator &a, double b) { return b * a; },
+      .def("__rmul__", [](const LocalOperator &a, Complex b) { return b * a; },
            py::is_operator())
-      .def("__mul__", [](const LocalOperator &a, int b) { return b * a; },
+      /*.def("__mul__", [](const LocalOperator &a, int b) { return b * a; },
            py::is_operator())
       .def("__rmul__", [](const LocalOperator &a, int b) { return b * a; },
            py::is_operator())
-      .def("__add__", [](const LocalOperator &a, double b) { return a + b; },
+      */
+      .def("__add__", [](const LocalOperator &a, Complex b) { return a + b; },
            py::is_operator())
+     /*
       .def("__add__", [](const LocalOperator &a, int b) { return a + b; },
            py::is_operator())
-      .def("__radd__", [](const LocalOperator &a, double b) { return a + b; },
+     */
+      .def("__radd__", [](const LocalOperator &a, Complex b) { return a + b; },
            py::is_operator())
+     /*
       .def("__radd__", [](const LocalOperator &a, int b) { return a + b; },
            py::is_operator())
+     */
       .def(py::self * py::self);
 }
 
